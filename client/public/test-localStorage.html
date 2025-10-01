@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>localStorage Test Suite</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+      background: #0f172a;
+      color: #e2e8f0;
+    }
+    h1 { color: #60a5fa; }
+    h2 { color: #818cf8; margin-top: 2rem; }
+    .test-section {
+      background: #1e293b;
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      margin-bottom: 1rem;
+      border: 1px solid #334155;
+    }
+    .test-result {
+      padding: 0.75rem;
+      margin: 0.5rem 0;
+      border-radius: 0.375rem;
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 0.875rem;
+    }
+    .pass {
+      background: rgba(16, 185, 129, 0.1);
+      color: #6ee7b7;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .fail {
+      background: rgba(239, 68, 68, 0.1);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    .info {
+      background: rgba(59, 130, 246, 0.1);
+      color: #93c5fd;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+    button {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.375rem;
+      cursor: pointer;
+      font-size: 1rem;
+      margin: 0.5rem 0.5rem 0.5rem 0;
+    }
+    button:hover {
+      opacity: 0.9;
+    }
+    button.danger {
+      background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    }
+    pre {
+      background: #0f172a;
+      padding: 1rem;
+      border-radius: 0.375rem;
+      overflow-x: auto;
+      border: 1px solid #334155;
+    }
+    .summary {
+      background: #1e293b;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin: 1rem 0;
+      border-left: 4px solid #60a5fa;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧪 localStorage Migration Test Suite</h1>
+  
+  <div class="test-section">
+    <h2>Test Controls</h2>
+    <button onclick="runAllTests()">▶️ Run All Tests</button>
+    <button onclick="clearResults()">🗑️ Clear Results</button>
+    <button onclick="viewStorage()" class="info">👁️ View Storage</button>
+    <button onclick="clearStorage()" class="danger">⚠️ Clear localStorage</button>
+  </div>
+
+  <div id="results"></div>
+
+  <script type="module">
+    // Import the localStorage service
+    import {
+      getInterviews,
+      getInterviewById,
+      saveInterview,
+      deleteInterview,
+      getCustomCategories,
+      getCustomCategoryById,
+      saveCustomCategory,
+      deleteCustomCategory,
+      exportAllData,
+      importData,
+      clearAllData,
+      getStorageUsage,
+      getStorageHealth,
+      getLastExportDate
+    } from './client/src/services/localStorage.js';
+
+    // Make functions globally available
+    window.localStorageService = {
+      getInterviews,
+      getInterviewById,
+      saveInterview,
+      deleteInterview,
+      getCustomCategories,
+      getCustomCategoryById,
+      saveCustomCategory,
+      deleteCustomCategory,
+      exportAllData,
+      importData,
+      clearAllData,
+      getStorageUsage,
+      getStorageHealth,
+      getLastExportDate
+    };
+
+    const results = document.getElementById('results');
+    let testResults = [];
+
+    function log(message, type = 'info') {
+      const div = document.createElement('div');
+      div.className = `test-result ${type}`;
+      div.textContent = message;
+      results.appendChild(div);
+      
+      testResults.push({ message, type, timestamp: new Date() });
+    }
+
+    function logObject(obj, label) {
+      const div = document.createElement('div');
+      div.className = 'test-result info';
+      div.innerHTML = `<strong>${label}:</strong><pre>${JSON.stringify(obj, null, 2)}</pre>`;
+      results.appendChild(div);
+    }
+
+    window.clearResults = function() {
+      results.innerHTML = '';
+      testResults = [];
+    };
+
+    window.clearStorage = function() {
+      if (confirm('Clear all localStorage? This will delete all test data.')) {
+        clearAllData();
+        log('✅ localStorage cleared', 'pass');
+      }
+    };
+
+    window.viewStorage = function() {
+      const interviews = getInterviews();
+      const categories = getCustomCategories();
+      const health = getStorageHealth();
+      
+      logObject({ interviews, categories, health }, 'Current Storage State');
+    };
+
+    // Test Suite
+    window.runAllTests = async function() {
+      clearResults();
+      
+      log('🚀 Starting localStorage Migration Test Suite', 'info');
+      log(`Test started at: ${new Date().toLocaleString()}`, 'info');
+      
+      // Clear data before tests
+      clearAllData();
+      log('✅ Cleared localStorage for fresh test run', 'pass');
+      
+      try {
+        await testInterviewOperations();
+        await testCategoryOperations();
+        await testExportImport();
+        await testStorageHealth();
+        await testEdgeCases();
+        
+        // Summary
+        const passed = testResults.filter(r => r.type === 'pass').length;
+        const failed = testResults.filter(r => r.type === 'fail').length;
+        
+        log('', 'info');
+        log(`📊 Test Summary: ${passed} passed, ${failed} failed`, failed === 0 ? 'pass' : 'fail');
+        
+      } catch (error) {
+        log(`❌ Test suite error: ${error.message}`, 'fail');
+        console.error(error);
+      }
+    };
+
+    async function testInterviewOperations() {
+      log('', 'info');
+      log('📝 Testing Interview Operations', 'info');
+      
+      // Test 1: Create interview
+      const mockInterview = {
+        title: 'Test Interview 1',
+        transcript: [
+          { role: 'assistant', text: 'Hello!', timestamp: Date.now() },
+          { role: 'user', text: 'Hi there!', timestamp: Date.now() }
+        ],
+        evaluation: {
+          summary: 'Great performance',
+          strengths: ['Clear communication', 'Good examples'],
+          improvements: ['More detail needed']
+        },
+        metadata: {
+          difficulty: 'medium',
+          persona: 'friendly_coach',
+          questionIds: ['q1', 'q2']
+        }
+      };
+
+      const saved = saveInterview(mockInterview);
+      if (saved && saved.id) {
+        log(`✅ Create interview: ID = ${saved.id}`, 'pass');
+      } else {
+        log('❌ Failed to create interview', 'fail');
+        return;
+      }
+
+      // Test 2: Get all interviews
+      const interviews = getInterviews();
+      if (interviews.length === 1) {
+        log(`✅ Get all interviews: Found ${interviews.length} interview(s)`, 'pass');
+      } else {
+        log(`❌ Get all interviews: Expected 1, got ${interviews.length}`, 'fail');
+      }
+
+      // Test 3: Get interview by ID
+      const retrieved = getInterviewById(saved.id);
+      if (retrieved && retrieved.id === saved.id) {
+        log(`✅ Get interview by ID: Found interview ${saved.id}`, 'pass');
+      } else {
+        log('❌ Failed to get interview by ID', 'fail');
+      }
+
+      // Test 4: Update interview
+      const updated = saveInterview({
+        ...saved,
+        title: 'Updated Test Interview'
+      });
+      if (updated.title === 'Updated Test Interview') {
+        log('✅ Update interview: Title updated successfully', 'pass');
+      } else {
+        log('❌ Failed to update interview', 'fail');
+      }
+
+      // Test 5: Create multiple interviews
+      saveInterview({ ...mockInterview, title: 'Interview 2' });
+      saveInterview({ ...mockInterview, title: 'Interview 3' });
+      const allInterviews = getInterviews();
+      if (allInterviews.length === 3) {
+        log(`✅ Multiple interviews: Found ${allInterviews.length} interviews`, 'pass');
+      } else {
+        log(`❌ Multiple interviews: Expected 3, got ${allInterviews.length}`, 'fail');
+      }
+
+      // Test 6: Delete interview
+      const deleted = deleteInterview(saved.id);
+      if (deleted) {
+        log(`✅ Delete interview: Successfully deleted ${saved.id}`, 'pass');
+      } else {
+        log('❌ Failed to delete interview', 'fail');
+      }
+
+      const afterDelete = getInterviews();
+      if (afterDelete.length === 2) {
+        log(`✅ Verify deletion: ${afterDelete.length} interviews remain`, 'pass');
+      } else {
+        log(`❌ Verify deletion: Expected 2, got ${afterDelete.length}`, 'fail');
+      }
+    }
+
+    async function testCategoryOperations() {
+      log('', 'info');
+      log('📁 Testing Category Operations', 'info');
+
+      // Test 1: Create category
+      const mockCategory = {
+        title: 'Test Category',
+        questions: [
+          { text: 'Question 1' },
+          { text: 'Question 2' }
+        ]
+      };
+
+      const saved = saveCustomCategory(mockCategory);
+      if (saved && saved.id) {
+        log(`✅ Create category: ID = ${saved.id}`, 'pass');
+      } else {
+        log('❌ Failed to create category', 'fail');
+        return;
+      }
+
+      // Test 2: Get all categories
+      const categories = getCustomCategories();
+      if (categories.length === 1) {
+        log(`✅ Get all categories: Found ${categories.length} category`, 'pass');
+      } else {
+        log(`❌ Get all categories: Expected 1, got ${categories.length}`, 'fail');
+      }
+
+      // Test 3: Get category by ID
+      const retrieved = getCustomCategoryById(saved.id);
+      if (retrieved && retrieved.id === saved.id) {
+        log(`✅ Get category by ID: Found category ${saved.id}`, 'pass');
+      } else {
+        log('❌ Failed to get category by ID', 'fail');
+      }
+
+      // Test 4: Verify question normalization
+      if (retrieved.questions.length === 2 && retrieved.questions[0].id) {
+        log('✅ Question normalization: Questions have IDs', 'pass');
+      } else {
+        log('❌ Question normalization failed', 'fail');
+      }
+
+      // Test 5: Update category
+      const updated = saveCustomCategory({
+        ...saved,
+        title: 'Updated Category',
+        questions: [
+          { text: 'New Question 1' },
+          { text: 'New Question 2' },
+          { text: 'New Question 3' }
+        ]
+      });
+      if (updated.questions.length === 3) {
+        log('✅ Update category: Questions updated successfully', 'pass');
+      } else {
+        log('❌ Failed to update category', 'fail');
+      }
+
+      // Test 6: Delete category
+      const deleted = deleteCustomCategory(saved.id);
+      if (deleted) {
+        log(`✅ Delete category: Successfully deleted ${saved.id}`, 'pass');
+      } else {
+        log('❌ Failed to delete category', 'fail');
+      }
+    }
+
+    async function testExportImport() {
+      log('', 'info');
+      log('💾 Testing Export/Import', 'info');
+
+      // Setup: Create some data
+      clearAllData();
+      saveInterview({ title: 'Export Test 1', transcript: [], evaluation: {}, metadata: {} });
+      saveInterview({ title: 'Export Test 2', transcript: [], evaluation: {}, metadata: {} });
+      saveCustomCategory({ title: 'Export Category', questions: [{ text: 'Q1' }] });
+
+      // Test 1: Export data
+      const exportData = exportAllData();
+      if (exportData.data && exportData.data.interviews.length === 2) {
+        log('✅ Export data: 2 interviews exported', 'pass');
+      } else {
+        log('❌ Export data failed', 'fail');
+      }
+
+      if (exportData.data.categories.length === 1) {
+        log('✅ Export data: 1 category exported', 'pass');
+      } else {
+        log('❌ Export data failed', 'fail');
+      }
+
+      // Test 2: Clear and import (replace mode)
+      clearAllData();
+      const replaceResult = importData(exportData, { merge: false });
+      if (replaceResult.totalInterviews === 2) {
+        log('✅ Import (replace): 2 interviews restored', 'pass');
+      } else {
+        log(`❌ Import (replace): Expected 2, got ${replaceResult.totalInterviews}`, 'fail');
+      }
+
+      // Test 3: Import with merge
+      saveInterview({ title: 'New Interview', transcript: [], evaluation: {}, metadata: {} });
+      const mergeResult = importData(exportData, { merge: true });
+      if (mergeResult.totalInterviews === 3) {
+        log('✅ Import (merge): 3 interviews total (2 original + 1 new)', 'pass');
+      } else {
+        log(`❌ Import (merge): Expected 3, got ${mergeResult.totalInterviews}`, 'fail');
+      }
+    }
+
+    async function testStorageHealth() {
+      log('', 'info');
+      log('🏥 Testing Storage Health', 'info');
+
+      const usage = getStorageUsage();
+      if (typeof usage === 'number') {
+        log(`✅ Storage usage: ${usage} KB`, 'pass');
+      } else {
+        log('❌ Failed to get storage usage', 'fail');
+      }
+
+      const health = getStorageHealth();
+      if (health.status && health.usagePercent !== undefined) {
+        log(`✅ Storage health: ${health.status} (${health.usagePercent}%)`, 'pass');
+      } else {
+        log('❌ Failed to get storage health', 'fail');
+      }
+
+      const lastExport = getLastExportDate();
+      if (lastExport) {
+        log(`✅ Last export date: ${new Date(lastExport).toLocaleString()}`, 'pass');
+      } else {
+        log('ℹ️ No export date (expected for new data)', 'info');
+      }
+    }
+
+    async function testEdgeCases() {
+      log('', 'info');
+      log('🔍 Testing Edge Cases', 'info');
+
+      // Test 1: Get non-existent interview
+      const notFound = getInterviewById('non-existent-id');
+      if (notFound === null) {
+        log('✅ Non-existent interview returns null', 'pass');
+      } else {
+        log('❌ Non-existent interview should return null', 'fail');
+      }
+
+      // Test 2: Delete non-existent interview
+      const deletedNonExistent = deleteInterview('non-existent-id');
+      if (deletedNonExistent === false) {
+        log('✅ Delete non-existent returns false', 'pass');
+      } else {
+        log('❌ Delete non-existent should return false', 'fail');
+      }
+
+      // Test 3: Save category without title (should fail)
+      try {
+        saveCustomCategory({ questions: [{ text: 'Q1' }] });
+        log('❌ Should fail when saving category without title', 'fail');
+      } catch (error) {
+        log('✅ Correctly rejects category without title', 'pass');
+      }
+
+      // Test 4: Save interview without data (should still work with defaults)
+      try {
+        const minimal = saveInterview({});
+        if (minimal && minimal.id) {
+          log('✅ Save minimal interview with defaults', 'pass');
+        } else {
+          log('❌ Failed to save minimal interview', 'fail');
+        }
+      } catch (error) {
+        log(`❌ Minimal interview save failed: ${error.message}`, 'fail');
+      }
+
+      // Test 5: Verify timestamps are ISO strings
+      const interview = getInterviews()[0];
+      if (interview && interview.createdAt && interview.updatedAt) {
+        const created = new Date(interview.createdAt);
+        if (!isNaN(created.getTime())) {
+          log('✅ Timestamps are valid ISO strings', 'pass');
+        } else {
+          log('❌ Invalid timestamp format', 'fail');
+        }
+      }
+    }
+
+    // Auto-run on page load
+    console.log('localStorage test suite loaded. Run runAllTests() or click the button to start.');
+  </script>
+</body>
+</html>
+
