@@ -1,4 +1,9 @@
-export default function QuestionStack({ questions }) {
+export default function QuestionStack({ questions, hide }) {
+  // Don't render if explicitly hidden (e.g., for language practice)
+  if (hide) {
+    return null;
+  }
+  
   return (
     <section className="card">
       <div className="card-header">

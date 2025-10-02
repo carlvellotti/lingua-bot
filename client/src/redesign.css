@@ -33,37 +33,37 @@
 
 :root {
   /* Backgrounds */
-  --bg-app: linear-gradient(180deg, rgba(9, 13, 27, 0.98) 0%, rgba(12, 18, 36, 0.95) 50%, rgba(9, 13, 27, 0.98) 100%);
-  --bg-card-primary: rgba(12, 19, 43, 0.76);
-  --bg-card-hover: rgba(16, 23, 46, 0.6);
-  --bg-card-active: rgba(99, 102, 241, 0.12);
-  --bg-elevated: rgba(13, 19, 39, 0.72);
-  --bg-sidebar: #111827;
+  --bg-app: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #dbeafe 100%);
+  --bg-card-primary: #ffffff;
+  --bg-card-hover: rgba(59, 130, 246, 0.05);
+  --bg-card-active: rgba(59, 130, 246, 0.08);
+  --bg-elevated: #f8fafc;
+  --bg-sidebar: #1e293b;
   
   /* Borders */
-  --border-default: rgba(129, 140, 248, 0.24);
-  --border-hover: rgba(129, 140, 248, 0.45);
-  --border-active: rgba(129, 140, 248, 0.6);
-  --border-subtle: rgba(129, 140, 248, 0.15);
+  --border-default: rgba(59, 130, 246, 0.2);
+  --border-hover: rgba(59, 130, 246, 0.4);
+  --border-active: rgba(59, 130, 246, 0.6);
+  --border-subtle: rgba(148, 163, 184, 0.2);
   
   /* Text Colors */
-  --text-primary: #ffffff;
-  --text-secondary: rgba(207, 219, 255, 0.75);
-  --text-muted: rgba(210, 222, 255, 0.7);
-  --text-accent: #a5b4fc;
-  --text-accent-bright: #c7d2fe;
+  --text-primary: #f8fafc;
+  --text-secondary: rgba(226, 232, 240, 0.9);
+  --text-muted: rgba(203, 213, 225, 0.8);
+  --text-accent: #60a5fa;
+  --text-accent-bright: #93c5fd;
   
   /* Accent Colors */
-  --accent-primary: #6366f1;
-  --accent-secondary: #8b5cf6;
-  --accent-light: rgba(99, 102, 241, 0.2);
-  --accent-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  --accent-primary: #3b82f6;
+  --accent-secondary: #2563eb;
+  --accent-light: rgba(59, 130, 246, 0.1);
+  --accent-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   
   /* Shadows */
-  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 8px 20px rgba(7, 12, 27, 0.4);
-  --shadow-lg: 0 12px 28px rgba(99, 102, 241, 0.25);
-  --shadow-glow: 0 0 0 2px rgba(67, 56, 202, 0.12);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 15px rgba(59, 130, 246, 0.1);
+  --shadow-glow: 0 0 0 3px rgba(59, 130, 246, 0.1);
   
   /* Spacing */
   --spacing-xs: 0.5rem;
@@ -117,8 +117,8 @@
 .app-shell {
   display: flex;
   min-height: 100vh;
-  background: linear-gradient(180deg, #f3f4f6 0%, #e5e7eb 100%);
-  color: #1f2933;
+  background: var(--bg-app);
+  color: #111827;
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
@@ -295,7 +295,7 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  background: linear-gradient(180deg, rgba(9, 13, 27, 0.98) 0%, rgba(12, 18, 36, 0.95) 50%, rgba(9, 13, 27, 0.98) 100%);
+  background: transparent;
 }
 
 .workspace-header {
@@ -310,13 +310,13 @@
 .workspace-header h2 {
   margin: 0;
   font-size: 1.75rem;
-  color: #ffffff;
+  color: #111827;
   font-weight: 600;
 }
 
 .workspace-header .subtle {
   margin: 0.35rem 0 0;
-  color: rgba(208, 220, 255, 0.75);
+  color: #64748b;
   font-size: 0.95rem;
 }
 

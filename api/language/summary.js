@@ -28,11 +28,29 @@ async function handler(req, res) {
       .map(turn => `${turn.role === 'assistant' ? 'Tutor' : 'Learner'}: ${turn.text}`)
       .join('\n\n');
 
-    const summaryPrompt = `You are a language learning coach reviewing a practice conversation. Analyze the following conversation and provide helpful feedback.
+    const languageNames = {
+      es: 'Spanish',
+      fr: 'French',
+      de: 'German',
+      it: 'Italian',
+      pt: 'Portuguese',
+      ja: 'Japanese',
+      zh: 'Chinese',
+      ko: 'Korean',
+      ru: 'Russian',
+      ar: 'Arabic',
+      hi: 'Hindi',
+      nl: 'Dutch'
+    };
+
+    const targetLanguage = languageNames[preferences?.language] || 'the target language';
+
+    const summaryPrompt = `You are a language learning coach reviewing a ${targetLanguage} practice conversation. Analyze the following conversation and provide helpful feedback.
 
 **Conversation:**
 ${transcript}
 
+**Target Language:** ${targetLanguage}
 **Learner's Level:** ${preferences?.level || 'intermediate'}
 **Practice Style:** ${preferences?.style || 'casual'}
 

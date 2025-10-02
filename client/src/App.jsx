@@ -127,6 +127,7 @@ function PracticeExperience() {
       <HistoryView
         onReturnToLive={() => resetPractice({ forceDiscard: true })}
         summary={summary}
+        sessionData={selectedSession}
       />
     );
   }
@@ -141,6 +142,8 @@ function PracticeExperience() {
       displayMessages={displayMessages}
       summary={summary}
       onReset={() => resetPractice()}
+      languagePreferences={preferences}
+      practiceSession={practiceSession}
     />
   );
 }
@@ -152,8 +155,8 @@ export default function App() {
     return (
       <div className="app-shell">
         <Sidebar />
-        <main className="workspace" style={{ backgroundColor: '#f0f7ff' }}>
-          <div className="w-full max-w-4xl mx-auto p-3 md:p-4">
+        <main className="workspace" style={{ backgroundColor: '#f0f9ff' }}>
+          <div className="w-full max-w-5xl mx-auto p-3 md:p-4">
             <SetupPage />
           </div>
         </main>

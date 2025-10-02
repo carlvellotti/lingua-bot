@@ -3,38 +3,119 @@ import { useAtom, useSetAtom } from 'jotai';
 import { languagePreferencesAtom, appModeAtom, practiceSessionAtom, isStartingSessionAtom, sessionErrorAtom } from '../../atoms/languageState.js';
 import { startLanguageSession } from '../../services/api.js';
 
+const languages = [
+  {
+    id: 'es',
+    label: 'Spanish',
+    flag: '🇪🇸',
+    description: 'Español'
+  },
+  {
+    id: 'en',
+    label: 'English',
+    flag: '🇺🇸',
+    description: 'English'
+  },
+  {
+    id: 'fr',
+    label: 'French',
+    flag: '🇫🇷',
+    description: 'Français'
+  },
+  {
+    id: 'de',
+    label: 'German',
+    flag: '🇩🇪',
+    description: 'Deutsch'
+  },
+  {
+    id: 'it',
+    label: 'Italian',
+    flag: '🇮🇹',
+    description: 'Italiano'
+  },
+  {
+    id: 'pt',
+    label: 'Portuguese',
+    flag: '🇵🇹',
+    description: 'Português'
+  },
+  {
+    id: 'ja',
+    label: 'Japanese',
+    flag: '🇯🇵',
+    description: '日本語'
+  },
+  {
+    id: 'zh',
+    label: 'Chinese',
+    flag: '🇨🇳',
+    description: '中文'
+  },
+  {
+    id: 'ko',
+    label: 'Korean',
+    flag: '🇰🇷',
+    description: '한국어'
+  },
+  {
+    id: 'ru',
+    label: 'Russian',
+    flag: '🇷🇺',
+    description: 'Русский'
+  },
+  {
+    id: 'ar',
+    label: 'Arabic',
+    flag: '🇸🇦',
+    description: 'العربية'
+  },
+  {
+    id: 'hi',
+    label: 'Hindi',
+    flag: '🇮🇳',
+    description: 'हिन्दी'
+  },
+  {
+    id: 'nl',
+    label: 'Dutch',
+    flag: '🇳🇱',
+    description: 'Nederlands'
+  }
+];
+
 const personalities = [
   {
-    id: 'friendly',
-    label: 'Friendly',
-    name: 'Sofia Chen',
-    description: 'Warm, approachable, and patient',
-    longDescription: 'A supportive language tutor who creates a comfortable environment for learning. Sofia has taught languages in community centers for over 5 years and believes in building confidence through positive reinforcement.',
-    imageUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80'
+    id: 'fizz',
+    label: 'Teen Punk',
+    name: 'Fizz',
+    description: 'Chaotic energy, wild stories, punk rock vibes',
+    longDescription: 'A 16-year-old punk enthusiast with 47 documented pranks and stories from 12 different cities. Fizz teaches through chaos and makes language learning feel like an adventure.',
+    imageUrl: '/character_images/u4945551362_animated_teenage_boy_punk_rock_boy_chilling_in_hi_de85203e-aee0-4d21-883b-5f651909d641_0.png'
   },
   {
-    id: 'professional',
-    label: 'Professional',
-    name: 'Dr. Marcus Wells',
-    description: 'Formal, concise, and business-oriented',
-    longDescription: 'A former diplomat and current business language consultant. Dr. Wells specializes in helping professionals master formal language for international business contexts and high-stakes negotiations.',
-    imageUrl: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80'
+    id: 'marcus',
+    label: 'Young Politician',
+    name: 'Marcus Chen-Williams',
+    description: 'Nerdy councilman who makes politics fun',
+    longDescription: 'The youngest city councilman ever elected, Marcus combines political buzzwords with sci-fi references and teaches through his campaign disasters.',
+    imageUrl: '/character_images/u4945551362_friendly_30_year_old_handsome_politician_sitting__0ee91f0c-4f68-4d12-9b99-952a488a7217_1.png'
   },
   {
-    id: 'humorous',
-    label: 'Humorous',
-    name: 'Jamie Rivera',
-    description: 'Fun, witty, and uses jokes',
-    longDescription: 'A stand-up comedian who teaches language through humor. Jamie believes that laughing while learning helps with retention and makes the process enjoyable. Expect puns, jokes, and cultural references in every conversation.',
-    imageUrl: 'https://images.unsplash.com/photo-1542103749-8ef59b94f47e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80'
+    id: 'sofia',
+    label: 'Hustler Waitress',
+    name: 'Sofia Rodriguez',
+    description: 'Ambitious go-getter with three side hustles',
+    longDescription: 'First-gen college grad working at a diner while building her empire. Sofia teaches language like a business skill and turns every conversation into a networking opportunity.',
+    imageUrl: '/character_images/u4945551362_animated_friendly_cool_20s_something_waitress_wor_1382bd2c-a9ee-4be3-b5a5-a54832a4ce67_1.png'
   },
   {
-    id: 'academic',
-    label: 'Academic',
-    name: 'Professor Eliza Thompson',
-    description: 'Intellectual, detailed, and educational',
-    longDescription: 'A linguistics professor with a passion for language structure and etymology. Prof. Thompson will challenge you with precise vocabulary and help you understand the deeper patterns and rules of language.',
-    imageUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80'
+    id: 'jazz',
+    label: 'World Traveler',
+    name: 'Jasmine "Jazz" Washington',
+    description: 'Wanderer with stories from 37 countries',
+    longDescription: 'Professional adventurer who left home at 19 and never stopped moving. Jazz teaches through wisdom collected from around the world and shares stories like campfire tales.',
+    imageUrl: '/character_images/u4945551362_animated_african_american_40s_woman_adventurer_wh_5866a4f5-fa96-4fe2-ae69-c733155abb1b_0.png'
   }
 ];
 
@@ -141,44 +222,43 @@ export default function SetupPage() {
 
   const renderPersonalityCards = () => {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-4 gap-3">
         {personalities.map(personality => (
           <div
             key={personality.id}
             onClick={() => handleChange('personality', personality.id)}
             className={`
-              border rounded-xl overflow-hidden cursor-pointer transition-all card-hover-effect
+              rounded-2xl overflow-hidden cursor-pointer transition-all
               ${preferences.personality === personality.id 
-                ? 'border-blue-300 ring-1 ring-blue-100 shadow-sm' 
-                : 'border-gray-300 bg-white hover:border-blue-200 hover:bg-blue-50/30'}
+                ? 'shadow-lg scale-[1.02]' 
+                : 'shadow-sm hover:shadow-md hover:scale-[1.01]'}
             `}
+            style={{
+              border: preferences.personality === personality.id 
+                ? '2px solid #3b82f6' 
+                : '2px solid #e5e7eb',
+              backgroundColor: '#ffffff'
+            }}
           >
-            <div className="flex flex-col">
-              <div className="relative h-64">
+            <div className="flex flex-col h-full">
+              <div className="relative w-full" style={{ paddingBottom: '100%' }}>
                 <img
                   src={personality.imageUrl}
                   alt={personality.name}
-                  className="w-full h-full object-cover"
+                  className="absolute inset-0 w-full h-full object-cover"
                 />
-                <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-transparent to-blue-50/20"></div>
+                <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-transparent to-black/40"></div>
                 {preferences.personality === personality.id && (
-                  <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-blue-400 flex items-center justify-center shadow-sm">
-                    <span className="text-white text-sm">✓</span>
+                  <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center shadow-lg">
+                    <span className="text-white text-xs font-bold">✓</span>
                   </div>
                 )}
               </div>
-              <div className="p-3">
-                <div className="flex items-center justify-between mb-1">
-                  <h3 className="font-medium text-sm text-gray-900">
-                    {personality.name}
-                  </h3>
-                  <span className="text-xs font-medium bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
-                    {personality.label}
-                  </span>
-                </div>
-                <p className="text-xs text-gray-600 line-clamp-3">
-                  {personality.longDescription}
-                </p>
+              <div className={`p-3 text-center transition-colors ${preferences.personality === personality.id ? 'bg-blue-50/50' : 'bg-white'}`}>
+                <h3 className="font-semibold text-sm mb-1" style={{ color: '#111827' }}>
+                  {personality.name}
+                </h3>
+                <p className="text-xs leading-snug" style={{ color: '#6b7280' }}>{personality.description}</p>
               </div>
             </div>
           </div>
@@ -189,32 +269,36 @@ export default function SetupPage() {
 
   const renderOptionCards = (options, category, selectedValue) => {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-4 gap-3">
         {options.map(option => (
           <div
             key={option.id}
             onClick={() => handleChange(category, option.id)}
             className={`
-              border rounded-lg p-3 cursor-pointer transition-all card-hover-effect
+              rounded-2xl p-4 cursor-pointer transition-all text-center relative
               ${selectedValue === option.id 
-                ? 'border-blue-500 bg-blue-50 shadow-md' 
-                : 'border-gray-300 bg-white shadow-sm hover:border-blue-200 hover:bg-blue-50/30'}
+                ? 'shadow-lg scale-[1.02]' 
+                : 'shadow-sm hover:shadow-md hover:scale-[1.01]'}
             `}
+            style={{
+              border: selectedValue === option.id 
+                ? '2px solid #3b82f6' 
+                : '2px solid #e5e7eb',
+              backgroundColor: selectedValue === option.id ? '#eff6ff' : '#ffffff'
+            }}
           >
-            <div className="flex items-center justify-between mb-1">
-              <h3 className="font-medium text-sm text-gray-900">
-                {option.label}
-              </h3>
-              <span className="text-lg">{option.icon}</span>
-            </div>
-            <p className="text-xs text-gray-600">{option.description}</p>
             {selectedValue === option.id && (
-              <div className="mt-1 w-full flex justify-end">
-                <div className="w-4 h-4 rounded-full bg-blue-500 flex items-center justify-center">
-                  <span className="text-white text-[8px]">✓</span>
-                </div>
+              <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center shadow-md">
+                <span className="text-white text-xs font-bold">✓</span>
               </div>
             )}
+            <div className="flex items-center justify-center mb-2">
+              <span className="text-3xl">{option.icon}</span>
+            </div>
+            <h3 className="font-semibold text-sm text-center mb-1" style={{ color: '#111827' }}>
+              {option.label}
+            </h3>
+            <p className="text-xs leading-snug" style={{ color: '#6b7280' }}>{option.description}</p>
           </div>
         ))}
       </div>
@@ -222,63 +306,78 @@ export default function SetupPage() {
   };
 
   return (
-    <div className="py-4">
-      <div className="text-center mb-6">
-        <h1 className="text-2xl font-bold text-blue-600 sm:text-3xl mb-1">
+    <div className="py-6 px-4" style={{ color: '#111827' }}>
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold mb-2" style={{ color: '#111827' }}>
           Customize Your Practice
         </h1>
-        <p className="mt-1 text-base text-gray-600">
+        <p className="text-base" style={{ color: '#6b7280' }}>
           Configure your language practice experience
         </p>
-        <div className="flex justify-center mt-2">
-          <div className="w-20 h-1 bg-gradient-to-r from-blue-300 to-sky-300 rounded-full"></div>
-        </div>
       </div>
       
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-8" style={{ color: '#111827' }}>
         <section>
-          <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
-            <span className="text-blue-500 mr-2">✿</span>
+          <h2 className="text-base font-semibold mb-3 flex items-center" style={{ color: '#111827' }}>
+            <span className="text-xl mr-2">🌍</span>
+            Language to Practice
+          </h2>
+          <select
+            value={preferences.language}
+            onChange={(e) => handleChange('language', e.target.value)}
+            className="w-full px-4 py-2.5 rounded-xl border-2 border-gray-200 bg-white text-gray-900 font-medium shadow-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all hover:border-gray-300"
+          >
+            {languages.map(language => (
+              <option key={language.id} value={language.id}>
+                {language.flag} {language.label} - {language.description}
+              </option>
+            ))}
+          </select>
+        </section>
+
+        <section>
+          <h2 className="text-base font-semibold mb-3 flex items-center" style={{ color: '#111827' }}>
+            <span className="text-xl mr-2">👥</span>
             Choose Your Conversation Partner
           </h2>
           {renderPersonalityCards()}
         </section>
 
         <section>
-          <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
-            <span className="text-blue-500 mr-2">✿</span>
+          <h2 className="text-base font-semibold mb-3 flex items-center" style={{ color: '#111827' }}>
+            <span className="text-xl mr-2">⚡</span>
             Speaking Speed
           </h2>
           {renderOptionCards(speeds, 'speed', preferences.speed)}
         </section>
 
         <section>
-          <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
-            <span className="text-blue-500 mr-2">✿</span>
+          <h2 className="text-base font-semibold mb-3 flex items-center" style={{ color: '#111827' }}>
+            <span className="text-xl mr-2">📊</span>
             Language Level
           </h2>
           {renderOptionCards(levels, 'level', preferences.level)}
         </section>
 
         <section>
-          <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
-            <span className="text-blue-500 mr-2">✿</span>
+          <h2 className="text-base font-semibold mb-3 flex items-center" style={{ color: '#111827' }}>
+            <span className="text-xl mr-2">💬</span>
             Speaking Style
           </h2>
           {renderOptionCards(styles, 'style', preferences.style)}
         </section>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+          <div className="bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-xl">
             {error}
           </div>
         )}
 
-        <div className="pt-4">
+        <div className="pt-6">
           <button
             type="submit"
             disabled={isStarting}
-            className="w-full bg-gradient-to-r from-blue-400 to-blue-500 text-white py-3 px-6 rounded-lg font-medium hover:from-blue-500 hover:to-blue-600 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-4 px-6 rounded-2xl font-semibold text-base hover:from-blue-600 hover:to-blue-700 transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.01]"
           >
             {isStarting ? 'Starting...' : 'Start Practicing ✨'}
           </button>

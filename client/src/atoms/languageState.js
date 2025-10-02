@@ -5,7 +5,8 @@ export const appModeAtom = atom('setup');
 
 // Language learning preferences
 export const languagePreferencesAtom = atom({
-  personality: 'friendly',
+  language: 'es', // Target language to learn
+  personality: 'fizz',
   speed: 'normal',
   level: 'intermediate',
   style: 'casual'
