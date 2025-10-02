@@ -25,11 +25,12 @@ async function handler(req, res) {
     }
 
     const transcript = conversation
-      .map(turn => `${turn.role === 'assistant' ? 'Tutor' : 'Learner'}: ${turn.text}`)
+      .map(turn => `${turn.role === 'assistant' ? 'Tutor' : 'Learner'}: ${turn.content || turn.text || ''}`)
       .join('\n\n');
 
     const languageNames = {
       es: 'Spanish',
+      en: 'English',
       fr: 'French',
       de: 'German',
       it: 'Italian',

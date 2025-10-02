@@ -163,7 +163,12 @@ export default function HistoryView({ onReturnToLive, summary, sessionData = nul
                       if (!trimmed) return null;
                       
                       if (trimmed.startsWith('- **') || trimmed.startsWith('**-')) {
-                        const text = trimmed.replace(/^-?\s*\*\*/, '').replace(/\*\*:?/, ':').replace(/\*\*/g, '');
+                        // Remove markdown formatting and clean up colons
+                        let text = trimmed
+                          .replace(/^-?\s*\*\*/, '')  // Remove leading - and **
+                          .replace(/\*\*/g, '')       // Remove all remaining **
+                          .replace(/::+/g, ':')       // Replace multiple colons with single
+                          .trim();
                         return (
                           <div key={i} className="pl-6 relative">
                             <span className="absolute left-0 text-blue-500 font-bold">→</span>

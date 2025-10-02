@@ -46,7 +46,7 @@ function Sidebar() {
   return (
     <aside className="sidebar">
       <div className="sidebar-header">
-        <h1 className="sidebar-title">Language Practice</h1>
+        <h1 className="sidebar-title">Lingua Bot</h1>
         <div className="sidebar-actions">
           <button type="button" className="sidebar-primary-action" onClick={handleNewSession}>
             New Session
