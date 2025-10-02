@@ -222,7 +222,7 @@ export default function SetupPage() {
 
   const renderPersonalityCards = () => {
     return (
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {personalities.map(personality => (
           <div
             key={personality.id}
@@ -254,11 +254,11 @@ export default function SetupPage() {
                   </div>
                 )}
               </div>
-              <div className={`p-3 text-center transition-colors ${preferences.personality === personality.id ? 'bg-blue-50/50' : 'bg-white'}`}>
-                <h3 className="font-semibold text-sm mb-1" style={{ color: '#111827' }}>
+              <div className={`p-2 sm:p-3 text-center transition-colors ${preferences.personality === personality.id ? 'bg-blue-50/50' : 'bg-white'}`}>
+                <h3 className="font-semibold text-xs sm:text-sm mb-1" style={{ color: '#111827' }}>
                   {personality.name}
                 </h3>
-                <p className="text-xs leading-snug" style={{ color: '#6b7280' }}>{personality.description}</p>
+                <p className="text-[10px] sm:text-xs leading-snug" style={{ color: '#6b7280' }}>{personality.description}</p>
               </div>
             </div>
           </div>
@@ -269,13 +269,13 @@ export default function SetupPage() {
 
   const renderOptionCards = (options, category, selectedValue) => {
     return (
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {options.map(option => (
           <div
             key={option.id}
             onClick={() => handleChange(category, option.id)}
             className={`
-              rounded-2xl p-4 cursor-pointer transition-all text-center relative
+              rounded-2xl p-3 sm:p-4 cursor-pointer transition-all text-center relative
               ${selectedValue === option.id 
                 ? 'shadow-lg scale-[1.02]' 
                 : 'shadow-sm hover:shadow-md hover:scale-[1.01]'}
@@ -293,12 +293,12 @@ export default function SetupPage() {
               </div>
             )}
             <div className="flex items-center justify-center mb-2">
-              <span className="text-3xl">{option.icon}</span>
+              <span className="text-2xl sm:text-3xl">{option.icon}</span>
             </div>
-            <h3 className="font-semibold text-sm text-center mb-1" style={{ color: '#111827' }}>
+            <h3 className="font-semibold text-xs sm:text-sm text-center mb-1" style={{ color: '#111827' }}>
               {option.label}
             </h3>
-            <p className="text-xs leading-snug" style={{ color: '#6b7280' }}>{option.description}</p>
+            <p className="text-[10px] sm:text-xs leading-snug" style={{ color: '#6b7280' }}>{option.description}</p>
           </div>
         ))}
       </div>
@@ -306,26 +306,26 @@ export default function SetupPage() {
   };
 
   return (
-    <div className="py-6 px-4" style={{ color: '#111827' }}>
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold mb-2" style={{ color: '#111827' }}>
+    <div className="py-6 px-4 max-w-6xl mx-auto" style={{ color: '#111827' }}>
+      <div className="text-center mb-8 hidden sm:block">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2" style={{ color: '#111827' }}>
           Customize Your Practice
         </h1>
-        <p className="text-base" style={{ color: '#6b7280' }}>
+        <p className="text-sm sm:text-base" style={{ color: '#6b7280' }}>
           Configure your language practice experience
         </p>
       </div>
       
-      <form onSubmit={handleSubmit} className="space-y-8" style={{ color: '#111827' }}>
+      <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8" style={{ color: '#111827' }}>
         <section>
-          <h2 className="text-base font-semibold mb-3 flex items-center" style={{ color: '#111827' }}>
-            <span className="text-xl mr-2">🌍</span>
+          <h2 className="text-sm sm:text-base font-semibold mb-3 flex items-center" style={{ color: '#111827' }}>
+            <span className="text-lg sm:text-xl mr-2">🌍</span>
             Language to Practice
           </h2>
           <select
             value={preferences.language}
             onChange={(e) => handleChange('language', e.target.value)}
-            className="w-full px-4 py-2.5 rounded-xl border-2 border-gray-200 bg-white text-gray-900 font-medium shadow-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all hover:border-gray-300"
+            className="w-full px-3 sm:px-4 py-2.5 rounded-xl border-2 border-gray-200 bg-white text-gray-900 font-medium shadow-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all hover:border-gray-300 text-sm sm:text-base"
           >
             {languages.map(language => (
               <option key={language.id} value={language.id}>
@@ -336,48 +336,48 @@ export default function SetupPage() {
         </section>
 
         <section>
-          <h2 className="text-base font-semibold mb-3 flex items-center" style={{ color: '#111827' }}>
-            <span className="text-xl mr-2">👥</span>
+          <h2 className="text-sm sm:text-base font-semibold mb-3 flex items-center" style={{ color: '#111827' }}>
+            <span className="text-lg sm:text-xl mr-2">👥</span>
             Choose Your Conversation Partner
           </h2>
           {renderPersonalityCards()}
         </section>
 
         <section>
-          <h2 className="text-base font-semibold mb-3 flex items-center" style={{ color: '#111827' }}>
-            <span className="text-xl mr-2">⚡</span>
+          <h2 className="text-sm sm:text-base font-semibold mb-3 flex items-center" style={{ color: '#111827' }}>
+            <span className="text-lg sm:text-xl mr-2">⚡</span>
             Speaking Speed
           </h2>
           {renderOptionCards(speeds, 'speed', preferences.speed)}
         </section>
 
         <section>
-          <h2 className="text-base font-semibold mb-3 flex items-center" style={{ color: '#111827' }}>
-            <span className="text-xl mr-2">📊</span>
+          <h2 className="text-sm sm:text-base font-semibold mb-3 flex items-center" style={{ color: '#111827' }}>
+            <span className="text-lg sm:text-xl mr-2">📊</span>
             Language Level
           </h2>
           {renderOptionCards(levels, 'level', preferences.level)}
         </section>
 
         <section>
-          <h2 className="text-base font-semibold mb-3 flex items-center" style={{ color: '#111827' }}>
-            <span className="text-xl mr-2">💬</span>
+          <h2 className="text-sm sm:text-base font-semibold mb-3 flex items-center" style={{ color: '#111827' }}>
+            <span className="text-lg sm:text-xl mr-2">💬</span>
             Speaking Style
           </h2>
           {renderOptionCards(styles, 'style', preferences.style)}
         </section>
 
         {error && (
-          <div className="bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-xl">
+          <div className="bg-red-50 border-2 border-red-200 text-red-700 px-3 sm:px-4 py-3 rounded-xl text-sm">
             {error}
           </div>
         )}
 
-        <div className="pt-6">
+        <div className="pt-4 sm:pt-6">
           <button
             type="submit"
             disabled={isStarting}
-            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-4 px-6 rounded-2xl font-semibold text-base hover:from-blue-600 hover:to-blue-700 transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.01]"
+            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 sm:py-4 px-4 sm:px-6 rounded-2xl font-semibold text-sm sm:text-base hover:from-blue-600 hover:to-blue-700 transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.01]"
           >
             {isStarting ? 'Starting...' : 'Start Practicing ✨'}
           </button>
