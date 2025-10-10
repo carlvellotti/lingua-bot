@@ -46,7 +46,7 @@ async function handler(req, res) {
 
     const targetLanguage = languageNames[preferences?.language] || 'the target language';
 
-    const summaryPrompt = `You are a language learning coach reviewing a ${targetLanguage} practice conversation. Analyze the following conversation and provide helpful feedback.
+    const summaryPrompt = `You are a language learning coach reviewing a ${targetLanguage} practice conversation. Analyze the following conversation and provide helpful feedback AND extract key memories.
 
 **Conversation:**
 ${transcript}
@@ -77,7 +77,35 @@ ${transcript}
 ## Vocabulary Review
 [List key words/phrases from this session with brief definitions]
 
-Keep the tone encouraging and constructive. Focus on actionable insights the learner can use to improve.`;
+Keep the tone encouraging and constructive. Focus on actionable insights the learner can use to improve.
+
+---
+
+**ADDITIONALLY, extract 3-5 key memories from this conversation that should be remembered for future sessions. ONLY include:**
+- Personal details the learner shared (job, hobbies, interests, family, lifestyle)
+- Topics they wanted to discuss or brought up
+- Stories they shared about their life
+- Preferences they mentioned (likes, dislikes, styles)
+- Goals or aspirations they discussed
+
+**DO NOT include:**
+- Mistakes, struggles, or errors they made
+- Grammar or vocabulary they had difficulty with
+- Areas they need to work on
+- Any performance assessment
+
+Return these as a JSON object at the very end of your response in this EXACT format:
+\`\`\`json
+{
+  "memories": [
+    "User is a high school teacher in San Francisco",
+    "Loves skateboarding and wants to learn new tricks",
+    "Enjoys outdoor activities on weekends"
+  ]
+}
+\`\`\`
+
+Keep memories concise (under 100 characters each), positive, and focused on who the person IS, not how they're learning.`;
 
     const openai = getOpenAI();
     const completion = await openai.chat.completions.create({
@@ -96,9 +124,27 @@ Keep the tone encouraging and constructive. Focus on actionable insights the lea
       max_tokens: 2000
     });
 
-    const summary = completion.choices[0]?.message?.content || 'Unable to generate feedback at this time.';
+    const rawContent = completion.choices[0]?.message?.content || 'Unable to generate feedback at this time.';
 
-    return res.json({ summary });
+    // Extract memories JSON from the response
+    let memories = [];
+    let summary = rawContent;
+    
+    try {
+      // Look for JSON code block with memories
+      const jsonMatch = rawContent.match(/```json\s*(\{[\s\S]*?\})\s*```/);
+      if (jsonMatch) {
+        const memoriesData = JSON.parse(jsonMatch[1]);
+        memories = Array.isArray(memoriesData.memories) ? memoriesData.memories : [];
+        // Remove the JSON block from the summary
+        summary = rawContent.replace(/```json\s*\{[\s\S]*?\}\s*```/, '').trim();
+      }
+    } catch (error) {
+      console.warn('Failed to extract memories from summary:', error);
+      // Continue without memories if extraction fails
+    }
+
+    return res.json({ summary, memories });
   } catch (error) {
     console.error('Language summary error:', error);
     return res.status(500).json({ error: 'Failed to generate session summary.' });

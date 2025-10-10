@@ -85,12 +85,16 @@ export async function createRealtimeSession(payload) {
   return handleResponse(response);
 }
 
-export async function startLanguageSession(preferences) {
+export async function startLanguageSession(preferences, memories = []) {
   // Start a language practice session with personality, speed, level, style
+  // memories is an optional array of memory objects or strings
   const response = await fetch(`${API_BASE_URL}/language/start-session`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(preferences)
+    body: JSON.stringify({
+      ...preferences,
+      memories
+    })
   });
   return handleResponse(response);
 }

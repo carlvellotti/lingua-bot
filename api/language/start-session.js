@@ -152,14 +152,32 @@ const languageNames = {
   nl: 'Dutch'
 };
 
-function buildLanguageTutoringPrompt(preferences) {
+function buildLanguageTutoringPrompt(preferences, memories = []) {
   const personality = personalities[preferences.personality] || personalities.fizz;
   const speedInstruction = speedInstructions[preferences.speed] || speedInstructions.normal;
   const levelInstruction = levelInstructions[preferences.level] || levelInstructions.intermediate;
   const styleInstruction = styleInstructions[preferences.style] || styleInstructions.casual;
   const targetLanguage = languageNames[preferences.language] || 'Spanish';
 
-  return `${personality.systemPrompt}
+  let promptParts = [personality.systemPrompt];
+
+  // Add memories if any exist
+  if (Array.isArray(memories) && memories.length > 0) {
+    promptParts.push('\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    promptParts.push('💭 WHAT YOU REMEMBER FROM PAST CONVERSATIONS:');
+    promptParts.push('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+    memories.forEach(memory => {
+      if (typeof memory === 'string') {
+        promptParts.push(`- ${memory}`);
+      } else if (memory?.memory) {
+        promptParts.push(`- ${memory.memory}`);
+      }
+    });
+    promptParts.push('\n**Reference these memories naturally when relevant in your conversation!**');
+    promptParts.push('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+  }
+
+  return `${promptParts.join('\n')}
 
 **IMPORTANT: You are teaching ${targetLanguage}. Conduct the entire conversation in ${targetLanguage}. The learner is practicing ${targetLanguage} with you.**
 
@@ -207,10 +225,10 @@ async function handler(req, res) {
   }
 
   try {
-    const preferences = req.body || {};
+    const { memories, ...preferences } = req.body || {};
     
     const personality = personalities[preferences.personality] || personalities.fizz;
-    const systemPrompt = buildLanguageTutoringPrompt(preferences);
+    const systemPrompt = buildLanguageTutoringPrompt(preferences, memories);
     
     // Use the selected target language for transcription
     const targetLanguage = preferences.language || 'es';

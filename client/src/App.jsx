@@ -9,7 +9,7 @@ import {
   sessionListAtom
 } from './atoms/languageState.js';
 import { summarizeLanguageSession } from './services/api.js';
-import { saveSession } from './services/localStorage.js';
+import { saveSession, saveMemories } from './services/localStorage.js';
 import { useRealtimeInterview } from './hooks/useRealtimeInterview.js';
 import { useInterviewMessages } from './hooks/useInterviewMessages.js';
 import { sortInterviewsByDate } from './utils/interviewHelpers.js';
@@ -58,7 +58,7 @@ function PracticeExperience() {
 
     try {
       setSummary('Generating learning insights…');
-      const { summary: summaryText } = await summarizeLanguageSession(conversation, preferences);
+      const { summary: summaryText, memories } = await summarizeLanguageSession(conversation, preferences);
       setSummary(summaryText || '');
 
       const metadata = {
@@ -72,6 +72,17 @@ function PracticeExperience() {
         metadata,
         title: `Practice Session - ${new Date().toLocaleDateString()}`
       });
+
+      // Save memories if any were extracted
+      if (Array.isArray(memories) && memories.length > 0 && preferences?.personality) {
+        try {
+          saveMemories(preferences.personality, memories, record?.id);
+          console.log(`Saved ${memories.length} memories for ${preferences.personality}`);
+        } catch (memErr) {
+          console.error('Failed to save memories:', memErr);
+          // Don't fail the whole operation if memory save fails
+        }
+      }
 
       setSessionList(prev => sortInterviewsByDate([record, ...prev.filter(item => item.id !== record?.id)]));
     } catch (err) {

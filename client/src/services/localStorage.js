@@ -8,6 +8,7 @@
 const STORAGE_KEYS = {
   INTERVIEWS: 'interview-coach-interviews',
   CATEGORIES: 'interview-coach-categories',
+  MEMORIES: 'lingua-bot-memories',
   VERSION: 'interview-coach-version',
   LAST_EXPORT: 'interview-coach-last-export'
 };
@@ -493,5 +494,136 @@ export function getStorageHealth() {
       usagePercent > 80 ? 'Storage usage high. Consider exporting and clearing old interviews.' :
       'Storage usage is healthy.'
   };
+}
+
+// ============================================
+// MEMORY OPERATIONS
+// ============================================
+
+/**
+ * Get all memories structure from localStorage
+ * @returns {Object} Memory object with personality keys
+ */
+function getAllMemories() {
+  ensureVersion();
+  if (!checkStorageAvailable()) {
+    console.warn('localStorage not available, returning empty object');
+    return {};
+  }
+  
+  const data = localStorage.getItem(STORAGE_KEYS.MEMORIES);
+  const memories = safeJSONParse(data, {});
+  
+  // Ensure it's an object
+  return typeof memories === 'object' && memories !== null ? memories : {};
+}
+
+/**
+ * Get memories for a specific personality
+ * @param {string} personalityId - Personality ID (fizz, marcus, sofia, jazz)
+ * @returns {Array} Array of memory objects
+ */
+export function getMemories(personalityId) {
+  if (!personalityId || typeof personalityId !== 'string') {
+    console.warn('Invalid personalityId provided to getMemories');
+    return [];
+  }
+  
+  const allMemories = getAllMemories();
+  const personalityMemories = allMemories[personalityId];
+  
+  return Array.isArray(personalityMemories) ? personalityMemories : [];
+}
+
+/**
+ * Save new memories for a personality
+ * @param {string} personalityId - Personality ID
+ * @param {Array} newMemories - Array of memory strings to add
+ * @param {string} sessionId - Session ID these memories came from
+ * @returns {Array} Updated array of memories for this personality
+ */
+export function saveMemories(personalityId, newMemories, sessionId) {
+  if (!personalityId || typeof personalityId !== 'string') {
+    throw new Error('Invalid personalityId');
+  }
+  
+  if (!Array.isArray(newMemories)) {
+    throw new Error('newMemories must be an array');
+  }
+  
+  if (!checkStorageAvailable()) {
+    throw new Error('localStorage is not available');
+  }
+  
+  const allMemories = getAllMemories();
+  const existingMemories = Array.isArray(allMemories[personalityId]) ? allMemories[personalityId] : [];
+  
+  const now = new Date().toISOString();
+  
+  // Convert string memories to memory objects
+  const memoryObjects = newMemories
+    .filter(memory => typeof memory === 'string' && memory.trim().length > 0)
+    .map(memory => ({
+      id: generateId(),
+      memory: memory.trim(),
+      timestamp: now,
+      sessionId: sessionId || null
+    }));
+  
+  // Append new memories
+  const updatedMemories = [...existingMemories, ...memoryObjects];
+  
+  // Update the personality's memories
+  allMemories[personalityId] = updatedMemories;
+  
+  // Save to localStorage
+  try {
+    localStorage.setItem(STORAGE_KEYS.MEMORIES, safeJSONStringify(allMemories));
+    return updatedMemories;
+  } catch (error) {
+    if (error.name === 'QuotaExceededError') {
+      throw new Error('Storage quota exceeded. Please clear some memories.');
+    }
+    throw error;
+  }
+}
+
+/**
+ * Clear all memories for a specific personality
+ * @param {string} personalityId - Personality ID
+ * @returns {boolean} True if successful
+ */
+export function clearMemories(personalityId) {
+  if (!personalityId || typeof personalityId !== 'string') {
+    throw new Error('Invalid personalityId');
+  }
+  
+  if (!checkStorageAvailable()) {
+    throw new Error('localStorage is not available');
+  }
+  
+  const allMemories = getAllMemories();
+  
+  // Remove this personality's memories
+  delete allMemories[personalityId];
+  
+  // Save updated structure
+  try {
+    localStorage.setItem(STORAGE_KEYS.MEMORIES, safeJSONStringify(allMemories));
+    return true;
+  } catch (error) {
+    console.error('Failed to clear memories:', error);
+    return false;
+  }
+}
+
+/**
+ * Get count of memories for a personality
+ * @param {string} personalityId - Personality ID
+ * @returns {number} Count of memories
+ */
+export function getMemoryCount(personalityId) {
+  const memories = getMemories(personalityId);
+  return memories.length;
 }
 

@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useAtom, useSetAtom } from 'jotai';
 import { languagePreferencesAtom, appModeAtom, practiceSessionAtom, isStartingSessionAtom, sessionErrorAtom } from '../../atoms/languageState.js';
 import { startLanguageSession } from '../../services/api.js';
+import MemoriesModal from './MemoriesModal.jsx';
+import { getMemoryCount, getMemories } from '../../services/localStorage.js';
 
 const languages = [
   {
@@ -194,6 +196,7 @@ export default function SetupPage() {
   const setPracticeSession = useSetAtom(practiceSessionAtom);
   const [isStarting, setIsStarting] = useAtom(isStartingSessionAtom);
   const [error, setError] = useAtom(sessionErrorAtom);
+  const [memoriesModalOpen, setMemoriesModalOpen] = useState(null); // { id, name } or null
 
   const handleChange = (category, value) => {
     setPreferences({
@@ -209,7 +212,11 @@ export default function SetupPage() {
     setIsStarting(true);
 
     try {
-      const session = await startLanguageSession(preferences);
+      // Load memories for the selected personality
+      const memories = preferences.personality ? getMemories(preferences.personality) : [];
+      console.log(`Loading ${memories.length} memories for ${preferences.personality}`);
+      
+      const session = await startLanguageSession(preferences, memories);
       setPracticeSession(session);
       setAppMode('practice');
     } catch (err) {
@@ -223,46 +230,73 @@ export default function SetupPage() {
   const renderPersonalityCards = () => {
     return (
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {personalities.map(personality => (
-          <div
-            key={personality.id}
-            onClick={() => handleChange('personality', personality.id)}
-            className={`
-              rounded-2xl overflow-hidden cursor-pointer transition-all
-              ${preferences.personality === personality.id 
-                ? 'shadow-lg scale-[1.02]' 
-                : 'shadow-sm hover:shadow-md hover:scale-[1.01]'}
-            `}
-            style={{
-              border: preferences.personality === personality.id 
-                ? '2px solid #3b82f6' 
-                : '2px solid #e5e7eb',
-              backgroundColor: '#ffffff'
-            }}
-          >
-            <div className="flex flex-col h-full">
-              <div className="relative w-full" style={{ paddingBottom: '100%' }}>
-                <img
-                  src={personality.imageUrl}
-                  alt={personality.name}
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
-                <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-transparent to-black/40"></div>
-                {preferences.personality === personality.id && (
-                  <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center shadow-lg">
-                    <span className="text-white text-xs font-bold">✓</span>
-                  </div>
-                )}
-              </div>
-              <div className={`p-2 sm:p-3 text-center transition-colors ${preferences.personality === personality.id ? 'bg-blue-50/50' : 'bg-white'}`}>
-                <h3 className="font-semibold text-xs sm:text-sm mb-1" style={{ color: '#111827' }}>
-                  {personality.name}
-                </h3>
-                <p className="text-[10px] sm:text-xs leading-snug" style={{ color: '#6b7280' }}>{personality.description}</p>
+        {personalities.map(personality => {
+          const memoryCount = getMemoryCount(personality.id);
+          
+          return (
+            <div
+              key={personality.id}
+              className={`
+                rounded-2xl overflow-hidden cursor-pointer transition-all relative
+                ${preferences.personality === personality.id 
+                  ? 'shadow-lg scale-[1.02]' 
+                  : 'shadow-sm hover:shadow-md hover:scale-[1.01]'}
+              `}
+              style={{
+                border: preferences.personality === personality.id 
+                  ? '2px solid #3b82f6' 
+                  : '2px solid #e5e7eb',
+                backgroundColor: '#ffffff'
+              }}
+            >
+              <div 
+                className="flex flex-col h-full"
+                onClick={() => handleChange('personality', personality.id)}
+              >
+                <div className="relative w-full" style={{ paddingBottom: '100%' }}>
+                  <img
+                    src={personality.imageUrl}
+                    alt={personality.name}
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                  <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-transparent to-black/40"></div>
+                  
+                  {/* Memories button - top left */}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setMemoriesModalOpen({ id: personality.id, name: personality.name });
+                    }}
+                    className="absolute top-2 left-2 w-10 h-10 rounded-xl bg-white/95 hover:bg-white flex items-center justify-center shadow-lg transition-all hover:scale-110 z-10 border-2 border-gray-200 hover:border-blue-300"
+                    title={`View ${personality.name}'s memories`}
+                  >
+                    <span className="text-xl">💭</span>
+                    {memoryCount > 0 && (
+                      <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-blue-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                        {memoryCount > 9 ? '9+' : memoryCount}
+                      </span>
+                    )}
+                  </button>
+                  
+                  {/* Selected checkmark - top right */}
+                  {preferences.personality === personality.id && (
+                    <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center shadow-lg">
+                      <span className="text-white text-xs font-bold">✓</span>
+                    </div>
+                  )}
+                </div>
+                <div className={`p-2 sm:p-3 text-center transition-colors ${preferences.personality === personality.id ? 'bg-blue-50/50' : 'bg-white'}`}>
+                  <h3 className="font-semibold text-xs sm:text-sm mb-1" style={{ color: '#111827' }}>
+                    {personality.name}
+                  </h3>
+                  <p className="text-[10px] sm:text-xs leading-snug" style={{ color: '#6b7280' }}>{personality.description}</p>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     );
   };
@@ -383,6 +417,15 @@ export default function SetupPage() {
           </button>
         </div>
       </form>
+
+      {/* Memories Modal */}
+      {memoriesModalOpen && (
+        <MemoriesModal
+          personalityId={memoriesModalOpen.id}
+          personalityName={memoriesModalOpen.name}
+          onClose={() => setMemoriesModalOpen(null)}
+        />
+      )}
     </div>
   );
 }

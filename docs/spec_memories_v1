@@ -1,0 +1,121 @@
+# Memory System Implementation Spec v1
+
+## Overview
+Add a memory system that allows each conversational bot to remember key information from past conversations with the user. Memories are stored per-personality and injected into future sessions.
+
+## User Requirements
+- Each bot should remember things from past conversations
+- Memories should be stored locally (localStorage)
+- Users can view memories for each bot
+- Users can clear all memories for a bot
+- No limits on number of memories (for now)
+- Automatic memory extraction from conversations
+- Memories are per-bot (fizz, marcus, sofia, jazz)
+
+## Implementation Plan
+
+### Phase 1: Backend - Add Memory Extraction to Summary API
+**File: `/Users/carl/lingua-bot/api/language/summary.js`**
+
+1. Modify the existing summary prompt to also extract memories
+2. Change return format from `{ summary }` to `{ summary, memories: [] }`
+3. Ask GPT to extract 3-5 key memories from the conversation
+
+**What to remember:**
+- User's interests, hobbies, life details they shared
+- Topics discussed (e.g., "talked about their job as a teacher")
+- Learning progress (words/phrases they struggled with, ones they mastered)
+- Conversation context (inside jokes, ongoing stories)
+- Important facts about the user
+
+---
+
+### Phase 2: Storage Layer - Memory Functions
+**File: `/Users/carl/lingua-bot/client/src/services/localStorage.js`**
+
+1. Add new storage key: `MEMORIES: 'lingua-bot-memories'`
+2. Add functions:
+   - `getMemories(personalityId)` - returns array of memories for a bot
+   - `saveMemories(personalityId, memories, sessionId)` - appends new memories
+   - `clearMemories(personalityId)` - deletes all memories for a bot
+
+**Storage structure:**
+```javascript
+{
+  fizz: [
+    { id, timestamp, memory, sessionId },
+    ...
+  ],
+  marcus: [...],
+  sofia: [...],
+  jazz: [...]
+}
+```
+
+---
+
+### Phase 3: Save Memories After Session
+**File: `/Users/carl/lingua-bot/client/src/App.jsx`**
+
+- In `fetchSummary()` function (line 53)
+- After getting summary response, extract `memories` array
+- Call `saveMemories(preferences.personality, memories, sessionId)`
+
+---
+
+### Phase 4: UI - Memories Button on Character Cards
+**File: `/Users/carl/lingua-bot/client/src/components/language/SetupPage.jsx`**
+
+- Add a memories button (💭 icon) to each personality card in `renderPersonalityCards()` 
+- Position it in the top-left corner of each card
+- Click opens `<MemoriesModal />`
+- Button should show on all cards (not just selected)
+
+---
+
+### Phase 5: UI - Memories Modal Component
+**File: CREATE `/Users/carl/lingua-bot/client/src/components/language/MemoriesModal.jsx`**
+
+- Modal displays all memories for selected personality
+- Show timestamp and memory text
+- "Clear All Memories" button at bottom with confirmation
+- Empty state message: "No memories yet! Start a conversation to build history."
+- Close button/overlay
+
+---
+
+### Phase 6: Inject Memories into New Sessions  
+**File: `/Users/carl/lingua-bot/api/language/start-session.js`**
+
+- Accept `memories` array in request body
+- Add to system prompt before returning session
+- Format: "**What you remember from past conversations:** - memory1 - memory2..."
+
+**File: `/Users/carl/lingua-bot/client/src/services/api.js`**
+
+- In `startLanguageSession()` function: load memories from localStorage and include in request
+
+---
+
+## Files Summary
+
+### Modify:
+1. `api/language/summary.js` - add memory extraction
+2. `client/src/services/localStorage.js` - add memory storage functions
+3. `client/src/App.jsx` - save memories after session
+4. `client/src/components/language/SetupPage.jsx` - add memories button
+5. `api/language/start-session.js` - inject memories into prompt
+6. `client/src/services/api.js` - send memories with session start
+
+### Create:
+1. `client/src/components/language/MemoriesModal.jsx` - new modal component
+
+---
+
+## Implementation Order:
+1. ✅ Backend memory extraction (summary endpoint)
+2. ✅ Storage helpers (localStorage functions)
+3. ✅ Save memories after session ends
+4. ✅ UI: Memories button + Modal
+5. ✅ Inject memories into new sessions
+
