@@ -9,7 +9,13 @@ export default function MemoriesModal({ personalityId, personalityName, onClose 
   useEffect(() => {
     if (personalityId) {
       const loadedMemories = getMemories(personalityId);
-      setMemories(loadedMemories);
+      // Sort by timestamp descending (newest first)
+      const sortedMemories = loadedMemories.sort((a, b) => {
+        const timeA = new Date(a.timestamp).getTime();
+        const timeB = new Date(b.timestamp).getTime();
+        return timeB - timeA; // Newest first
+      });
+      setMemories(sortedMemories);
     }
   }, [personalityId]);
 

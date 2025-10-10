@@ -17,6 +17,20 @@ This document summarizes how the two projects in this workspace are structured a
 
 See `docs/specs_completed/localStorage-migration.md` for full details.
 
+**Memory System for Language Bots (October 2025)**: Conversational continuity across sessions:
+- **Per-bot memory storage** in localStorage (fizz, marcus, sofia, jazz each have separate memories)
+- **Automatic extraction** using GPT-5 after each conversation (up to 10 new memories per session)
+- **Smart deduplication** - sends existing memories to GPT to avoid repeats, only extracts NEW information
+- **Memory modal UI** - 💭 button on each character card shows all memories with timestamps
+- **Reverse chronological order** - newest memories displayed first
+- **Clear all option** - users can wipe memories per bot with confirmation
+- **Context injection** - memories automatically loaded and injected into system prompts for future sessions
+- **Focus on identity** - only remembers personal details, topics, stories, preferences (NOT learning struggles)
+- **Memory updates** - can add updates to existing memories when information changes
+- **Storage layer**: `getMemories()`, `saveMemories()`, `clearMemories()` in `localStorage.js`
+
+See `docs/spec_memories_v1` for implementation details.
+
 ---
 
 ## Recent Updates (September 2025)

@@ -99,12 +99,13 @@ export async function startLanguageSession(preferences, memories = []) {
   return handleResponse(response);
 }
 
-export async function summarizeLanguageSession(conversation, preferences) {
+export async function summarizeLanguageSession(conversation, preferences, existingMemories = []) {
   // Generate language learning insights from the conversation
+  // existingMemories is an optional array of existing memory objects to avoid duplicates
   const response = await fetch(`${API_BASE_URL}/language/summary`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ conversation, preferences })
+    body: JSON.stringify({ conversation, preferences, existingMemories })
   });
   return handleResponse(response);
 }

@@ -18,7 +18,7 @@ async function handler(req, res) {
   }
 
   try {
-    const { conversation, preferences } = req.body || {};
+    const { conversation, preferences, existingMemories } = req.body || {};
 
     if (!Array.isArray(conversation) || conversation.length === 0) {
       return res.status(400).json({ error: 'Invalid conversation data' });
@@ -46,6 +46,19 @@ async function handler(req, res) {
 
     const targetLanguage = languageNames[preferences?.language] || 'the target language';
 
+    // Format existing memories if provided
+    let existingMemoriesSection = '';
+    if (Array.isArray(existingMemories) && existingMemories.length > 0) {
+      existingMemoriesSection = '\n\n**EXISTING MEMORIES YOU ALREADY HAVE:**\n';
+      existingMemories.forEach(mem => {
+        const memoryText = typeof mem === 'string' ? mem : mem?.memory;
+        if (memoryText) {
+          existingMemoriesSection += `- ${memoryText}\n`;
+        }
+      });
+      existingMemoriesSection += '\n**DO NOT repeat any of these existing memories. Only extract NEW information from this conversation.**\n';
+    }
+
     const summaryPrompt = `You are a language learning coach reviewing a ${targetLanguage} practice conversation. Analyze the following conversation and provide helpful feedback AND extract key memories.
 
 **Conversation:**
@@ -54,7 +67,7 @@ ${transcript}
 **Target Language:** ${targetLanguage}
 **Learner's Level:** ${preferences?.level || 'intermediate'}
 **Practice Style:** ${preferences?.style || 'casual'}
-
+${existingMemoriesSection}
 **Provide feedback in the following format:**
 
 ## Summary
@@ -81,18 +94,26 @@ Keep the tone encouraging and constructive. Focus on actionable insights the lea
 
 ---
 
-**ADDITIONALLY, extract 3-5 key memories from this conversation that should be remembered for future sessions. ONLY include:**
-- Personal details the learner shared (job, hobbies, interests, family, lifestyle)
-- Topics they wanted to discuss or brought up
-- Stories they shared about their life
-- Preferences they mentioned (likes, dislikes, styles)
-- Goals or aspirations they discussed
+**ADDITIONALLY, extract up to up to 10 NEW key memories from this conversation that should be remembered for future sessions.**
+
+**CRITICAL: Only extract information that is NEW and NOT already covered in the existing memories above. Do not repeat or rephrase existing memories. UNLESS their is an update, in which case add the update.**
+
+**ONLY include:**
+- NEW personal details the learner shared (job, hobbies, interests, family, lifestyle)
+- NEW topics they wanted to discuss or brought up
+- NEW stories they shared about their life
+- NEW preferences they mentioned (likes, dislikes, styles)
+- NEW goals or aspirations they discussed
+- UPDATES to existing memories
 
 **DO NOT include:**
+- Anything already in the existing memories list (if provided)
 - Mistakes, struggles, or errors they made
 - Grammar or vocabulary they had difficulty with
 - Areas they need to work on
 - Any performance assessment
+
+**If there are fewer than 10 new things to remember, that's fine - only extract what's genuinely new.**
 
 Return these as a JSON object at the very end of your response in this EXACT format:
 \`\`\`json
@@ -109,7 +130,7 @@ Keep memories concise (under 100 characters each), positive, and focused on who 
 
     const openai = getOpenAI();
     const completion = await openai.chat.completions.create({
-      model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+      model: process.env.OPENAI_MODEL || 'gpt-5',
       messages: [
         {
           role: 'system',

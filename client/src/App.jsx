@@ -9,7 +9,7 @@ import {
   sessionListAtom
 } from './atoms/languageState.js';
 import { summarizeLanguageSession } from './services/api.js';
-import { saveSession, saveMemories } from './services/localStorage.js';
+import { saveSession, saveMemories, getMemories } from './services/localStorage.js';
 import { useRealtimeInterview } from './hooks/useRealtimeInterview.js';
 import { useInterviewMessages } from './hooks/useInterviewMessages.js';
 import { sortInterviewsByDate } from './utils/interviewHelpers.js';
@@ -58,7 +58,11 @@ function PracticeExperience() {
 
     try {
       setSummary('Generating learning insights…');
-      const { summary: summaryText, memories } = await summarizeLanguageSession(conversation, preferences);
+      
+      // Load existing memories to avoid duplicates
+      const existingMemories = preferences?.personality ? getMemories(preferences.personality) : [];
+      
+      const { summary: summaryText, memories } = await summarizeLanguageSession(conversation, preferences, existingMemories);
       setSummary(summaryText || '');
 
       const metadata = {
