@@ -1,6 +1,6 @@
 import { OpenAI } from 'openai';
 
-export const REALTIME_MODEL = process.env.REALTIME_MODEL || 'gpt-realtime-mini';
+export const REALTIME_MODEL = process.env.REALTIME_MODEL || 'gpt-realtime';
 export const REALTIME_VOICE = process.env.REALTIME_VOICE || 'alloy';
 export const REALTIME_BASE_URL = process.env.REALTIME_BASE_URL || 'https://api.openai.com/v1/realtime/calls';
 

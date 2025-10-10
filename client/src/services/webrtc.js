@@ -18,7 +18,7 @@ export async function createRealtimeConnection({
   onDataChannelClose,
   onIceStateChange,
   clientSecret,
-  model = 'gpt-realtime-mini',
+  model = 'gpt-realtime',
   baseUrl = 'https://api.openai.com/v1/realtime/calls'
 }) {
   // Create peer connection
