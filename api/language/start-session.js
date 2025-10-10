@@ -1,6 +1,6 @@
 import { withCors } from '../_lib/cors.js';
 
-const REALTIME_MODEL = process.env.REALTIME_MODEL || 'gpt-4o-realtime-preview-2024-12-17';
+const REALTIME_MODEL = process.env.REALTIME_MODEL || 'gpt-realtime-mini';
 
 const personalities = {
   fizz: {

@@ -1,7 +1,7 @@
 import { OpenAI } from 'openai';
 import { getCategoryById, getQuestionsByIds } from '../_lib/config.js';
 
-const REALTIME_MODEL = process.env.REALTIME_MODEL || 'gpt-4o-realtime-preview-2024-12-17';
+const REALTIME_MODEL = process.env.REALTIME_MODEL || 'gpt-realtime-mini';
 const REALTIME_VOICE = process.env.REALTIME_VOICE || 'alloy';
 
 const personas = {

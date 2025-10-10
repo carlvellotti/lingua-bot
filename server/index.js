@@ -20,7 +20,7 @@ dotenv.config({ path: path.join(__dirname, '.env') });
 dotenv.config({ path: path.join(__dirname, '..', '.env') });
 
 const PORT = process.env.PORT || 4000;
-const REALTIME_MODEL = process.env.REALTIME_MODEL || 'gpt-4o-realtime-preview-2024-12-17';
+const REALTIME_MODEL = process.env.REALTIME_MODEL || 'gpt-realtime-mini';
 const REALTIME_VOICE = process.env.REALTIME_VOICE || 'alloy';
 const REALTIME_BASE_URL = process.env.REALTIME_BASE_URL || 'https://api.openai.com/v1/realtime/calls';
 
